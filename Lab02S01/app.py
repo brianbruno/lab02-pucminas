@@ -86,8 +86,10 @@ for node in result['data']['search']['nodes']:
         primaryLanguage = node['primaryLanguage']['name']
 
     dir_name = "repositories/"+node['owner']['login']
-    os.makedirs(dir_name)
-    git.Git(dir_name).clone(node['url'])
+
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+        git.Git(dir_name).clone(node['url'])
 
     print(analyze(dir_name+'/'+node['name']))
 
