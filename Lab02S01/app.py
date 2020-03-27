@@ -75,8 +75,7 @@ result = run_query(json, headers)
 nodes = result['data']['search']['nodes']
 
 with open("repos.csv", 'a') as the_file:
-    the_file.write('stars,watchers,forks,loc,releases,releases_frequency,age\n'
-                   '')
+    the_file.write('name,stars,watchers,forks,loc,releases,releases_frequency,age\n')
 
 # saving data
 for node in result['data']['search']['nodes']:
@@ -89,11 +88,25 @@ for node in result['data']['search']['nodes']:
 
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
-        git.Git(dir_name).clone(node['url'])
 
-    print(analyze(dir_name+'/'+node['name']))
+    git.Git(dir_name).clone(node['url'])
 
+    totalLoc = 0
+
+    for root, dirs, files in os.walk(node['nameWithOwner']):
+        for file in files:
+            if file.endswith('.py'):
+                fullpath = os.path.join(root, file)
+                with open(fullpath, encoding="utf8") as f:
+                    content = f.read()
+                    b = analyze(content)
+                    print(b)
+                    i = 0
+                    for item in b:
+                        if i == 0:
+                            totalLoc += item
+                            i += 1
 
     with open("repos.csv", 'a') as the_file:
-        the_file.write(str(node['stargazers']['totalCount']) + "," + str(node['watchers']['totalCount']) + "," + str(node['forks']['totalCount']) + ","
-                       '0,' + str(node['releases']['totalCount']) + ',' + 'frequencia,' + 'idade' + "\n")
+        the_file.write(node['nameWithOwner'] + ',' + str(node['stargazers']['totalCount']) + "," + str(node['watchers']['totalCount']) + "," + str(node['forks']['totalCount']) + "," +
+                       str(totalLoc) + ',' + str(node['releases']['totalCount']) + ',' + 'frequencia,' + 'idade' + "\n")

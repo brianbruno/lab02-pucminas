@@ -1,8 +1,9 @@
-stars,watchers,forks,loc,releases,releases_frequency,age
-stars,watchers,forks,loc,releases,releases_frequency,age
-stars,watchers,forks,loc,releases,releases_frequency,age
-stars,watchers,forks,loc,releases,releases_frequency,age
-stars,watchers,forks,loc,releases,releases_frequency,age
-stars,watchers,forks,loc,releases,releases_frequency,age
-149,18,19,0,0,frequencia,idade
-stars,watchers,forks,loc,releases,releases_frequency,age
+name,stars,watchers,forks,loc,releases,releases_frequency,age
+gvanrossum/pegen,149,18,19,0,0,frequencia,idade
+gvanrossum/guidos_time_machine,51,12,2,0,0,frequencia,idade
+gvanrossum/ctok,51,3,5,0,0,frequencia,idade
+gvanrossum/gvanrossum.github.io,41,2,6,0,0,frequencia,idade
+gvanrossum/pythonlabs,16,2,0,0,0,frequencia,idade
+gvanrossum/ballot-box,8,2,4,0,0,frequencia,idade
+gvanrossum/pep550,7,3,1,0,0,frequencia,idade
+gvanrossum/mypy-dummy,6,2,0,0,0,frequencia,idade
