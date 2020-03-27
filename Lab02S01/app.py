@@ -2,6 +2,8 @@ import requests
 from radon.raw import analyze
 import git
 import os
+import datetime
+from datetime import date
 
 def run_query(json, headers): # A simple function to use requests.post to make the API call.
 
@@ -75,7 +77,7 @@ result = run_query(json, headers)
 nodes = result['data']['search']['nodes']
 
 with open("repos.csv", 'a') as the_file:
-    the_file.write('name,stars,watchers,forks,loc,releases,releases_frequency,age\n')
+    the_file.write('name,stars,watchers,forks,loc,releases,releases_by_week,age_weeks\n')
 
 # saving data
 for node in result['data']['search']['nodes']:
@@ -107,6 +109,15 @@ for node in result['data']['search']['nodes']:
                             totalLoc += item
                             i += 1
 
+    created_date = node['createdAt'][0:10]
+
+    today = date.today()
+    date_time_obj = datetime.datetime.strptime(created_date, '%Y-%m-%d').date()
+
+    days = abs(today - date_time_obj).days
+    weeks = days // 7
+    releases_by_week = node['releases']['totalCount']/weeks
+
     with open("repos.csv", 'a') as the_file:
         the_file.write(node['nameWithOwner'] + ',' + str(node['stargazers']['totalCount']) + "," + str(node['watchers']['totalCount']) + "," + str(node['forks']['totalCount']) + "," +
-                       str(totalLoc) + ',' + str(node['releases']['totalCount']) + ',' + 'frequencia,' + 'idade' + "\n")
+                       str(totalLoc) + ',' + str(node['releases']['totalCount']) + ',' + str(releases_by_week) + ',' + str(weeks)  + "\n")
