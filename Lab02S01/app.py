@@ -93,7 +93,7 @@ for node in result['data']['search']['nodes']:
 
     totalLoc = 0
 
-    for root, dirs, files in os.walk(node['nameWithOwner']):
+    for root, dirs, files in os.walk('repositories/' + node['nameWithOwner']):
         for file in files:
             if file.endswith('.py'):
                 fullpath = os.path.join(root, file)
