@@ -20,11 +20,11 @@ def run_query(json, headers): # A simple function to use requests.post to make t
 
 fileName = 'issues-' + str(int(time.time())) + '.csv'
 with open(fileName, 'a') as the_file:
-    the_file.write('nameWithOwner,issueNumber,issueTitle\n')
+    the_file.write('nameWithOwner,number,state\n')
 
 query = """
 {
-  search(query:"stars:>100", type:REPOSITORY, first:3 {AFTER})
+  search(query:"stars:>100", type:REPOSITORY, first:4 {AFTER})
   {
     pageInfo{
         hasNextPage
@@ -35,7 +35,7 @@ query = """
       {
         nameWithOwner
         url
-        issues (first:5, orderBy: { field: COMMENTS, direction: DESC }) {
+        issues (first:100, orderBy: { field: CREATED_AT, direction: DESC }) {
           pageInfo{
             hasNextPage
             endCursor
@@ -43,7 +43,7 @@ query = """
           totalCount
           nodes {
             number            
-            title
+            state
           }
         }
       }
@@ -76,7 +76,7 @@ next_page = result["data"]["search"]["pageInfo"]["hasNextPage"]
 totalIssues = 0
 
 
-while next_page and totalIssues < 1000:
+while next_page and total_pages < 125:
     try:
         print('pages: ' + str(total_pages))
         total_pages += 1
@@ -88,7 +88,7 @@ while next_page and totalIssues < 1000:
 
             for issue in node['issues']['nodes']:
                 with open(fileName, 'a', encoding="utf-8") as the_file:
-                    the_file.write(node['nameWithOwner'] + ',' + str(issue['number']) + ',' + issue['title'].replace("\"", "'") + "\n")
+                    the_file.write(node['nameWithOwner'] + ',' + str(issue['number']) + ',' + issue['state'] + "\n")
 
         print('Total de issues: ' + str(totalIssues))
 
