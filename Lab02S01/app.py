@@ -3,7 +3,9 @@ from radon.raw import analyze
 import git
 import os
 import datetime
+import time
 from datetime import date
+import shutil
 
 def run_query(json, headers): # A simple function to use requests.post to make the API call.
 
@@ -17,7 +19,7 @@ def run_query(json, headers): # A simple function to use requests.post to make t
 
 query = """
 {
-  search(query:"user:gvanrossum", type:REPOSITORY, first:50)
+  search(query:"stars:>100 and language:Python", type:REPOSITORY, first:10{AFTER})
   {
     pageInfo{
         hasNextPage
@@ -76,48 +78,74 @@ result = run_query(json, headers)
 
 nodes = result['data']['search']['nodes']
 
-with open("repos.csv", 'a') as the_file:
-    the_file.write('name,stars,watchers,forks,loc,releases,releases_by_week,age_weeks\n')
+next_page = result["data"]["search"]["pageInfo"]["hasNextPage"]
+
+while next_page and total_pages < 3:
+    try:
+        print('pages: ' + str(total_pages))
+        total_pages += 1
+        cursor = result["data"]["search"]["pageInfo"]["endCursor"]
+        next_query = query.replace("{AFTER}", ", after: \"%s\"" % cursor)
+        json["query"] = next_query
+        result = run_query(json, headers)
+        nodes += result['data']['search']['nodes']
+        next_page = result["data"]["search"]["pageInfo"]["hasNextPage"]
+
+        with open("repos.csv", 'a') as the_file:
+            the_file.write('name,stars,watchers,forks,loc,releases,releases_by_week,age_weeks\n')
+    except:
+        print('Tentando novamente')
+        time.sleep(10)
 
 # saving data
-for node in result['data']['search']['nodes']:
-    if (node['primaryLanguage'] is None):
-        primaryLanguage = 'None'
-    else:
-        primaryLanguage = node['primaryLanguage']['name']
+for node in nodes:
+    print(node['nameWithOwner'])
 
-    dir_name = "repositories/"+node['owner']['login']
+    try:
+        if (node['primaryLanguage'] is None):
+          primaryLanguage = 'None'
+        else:
+          primaryLanguage = node['primaryLanguage']['name']
 
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+        dir_name = "repositories/"+node['owner']['login']
 
-    git.Git(dir_name).clone(node['url'])
+        if not os.path.exists(dir_name):
+          os.makedirs(dir_name)
 
-    totalLoc = 0
+        git.Git(dir_name).clone(node['url'])
 
-    for root, dirs, files in os.walk('repositories/' + node['nameWithOwner']):
-        for file in files:
-            if file.endswith('.py'):
-                fullpath = os.path.join(root, file)
-                with open(fullpath, encoding="utf8") as f:
-                    content = f.read()
-                    b = analyze(content)
-                    print(b)
-                    i = 0
-                    for item in b:
-                        if i == 0:
-                            totalLoc += item
-                            i += 1
+        totalLoc = 0
 
-    created_date = node['createdAt'][0:10]
+        for root, dirs, files in os.walk('repositories/' + node['nameWithOwner']):
+          for file in files:
+              if file.endswith('.py'):
+                  fullpath = os.path.join(root, file)
+                  with open(fullpath, encoding="utf8") as f:
+                      content = f.read()
+                      b = analyze(content)
+                      # print(b)
+                      i = 0
+                      for item in b:
+                          if i == 0:
+                              totalLoc += item
+                              i += 1
 
-    today = date.today()
-    date_time_obj = datetime.datetime.strptime(created_date, '%Y-%m-%d').date()
+        created_date = node['createdAt'][0:10]
 
-    days = abs(today - date_time_obj).days
-    weeks = days // 7
-    releases_by_week = node['releases']['totalCount']/weeks
+        today = date.today()
+        date_time_obj = datetime.datetime.strptime(created_date, '%Y-%m-%d').date()
 
-    with open("repos.csv", 'a') as the_file:
-        the_file.write(node['nameWithOwner'] + ',' + str(node['stargazers']['totalCount']) + "," + str(node['watchers']['totalCount']) + "," + str(node['forks']['totalCount']) + "," +
-                       str(totalLoc) + ',' + str(node['releases']['totalCount']) + ',' + str(releases_by_week) + ',' + str(weeks)  + "\n")
+        days = abs(today - date_time_obj).days
+        weeks = days // 7
+        releases_by_week = node['releases']['totalCount']/weeks
+
+        with open("repos.csv", 'a') as the_file:
+          the_file.write(node['nameWithOwner'] + ',' + str(node['stargazers']['totalCount']) + "," + str(node['watchers']['totalCount']) + "," + str(node['forks']['totalCount']) + "," +
+                          str(totalLoc) + ',' + str(node['releases']['totalCount']) + ',' + str(releases_by_week) + ',' + str(weeks)  + "\n")
+
+        shutil.rmtree('repositories/' + node['nameWithOwner'], ignore_errors=True)
+
+    except:
+        print("Tentando novamente")
+        shutil.rmtree('repositories/' + node['nameWithOwner'], ignore_errors=True)
+        time.sleep(5)

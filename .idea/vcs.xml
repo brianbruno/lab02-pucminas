@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repositories/AndroBugs/AndroBugs_Framework" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repositories/Raymond-sci/AND" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repositories/androguard/androguard" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repositories/dtmilano/AndroidViewClient" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repositories/junyanz/pytorch-CycleGAN-and-pix2pix" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repositories/kivy/python-for-android" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repositories/mnielsen/neural-networks-and-deep-learning" vcs="Git" />
+  </component>
+</project>
